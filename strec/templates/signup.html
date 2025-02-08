@@ -1,0 +1,37 @@
+{% extends "_base.html" %}
+    {% block head %}
+        <title>Student Signup.</title>
+    {% endblock head %}
+    {% block body %}
+        <div class="logo1">Student Login.</div>
+        <form hx-post="/signup/" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner">
+            {% csrf_token %}
+            <input name="username" placeholder="username" required/>
+            <input name="password" placeholder="password" type="password" required/>
+            <input value="signup" type="submit"/>
+        </form>
+        <div class="response" style="display:flex; align-items: center">
+            <svg style="display:inline" width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" id="spinner"class="htmx-indicator">
+                <path d="M 10 50 A 40 40 0 1 1 50 90" stroke="black" fill="transparent" stroke-width="2" />
+            </svg>
+            <div style="display:inline; animation: fade 2s forwards">{{message}}</div>
+        </div>
+        <script>
+            function handleResponse(event) {
+                // Get the response data from the server
+                const response = event.detail.xhr.responseText;
+                const data = JSON.parse(response);
+
+                // Check if the response indicates success
+                if (data.status === 'success') {
+                    // Redirect the user to the new URL provided by the server
+                    window.location.href = data.redirect_url;
+                } else {
+                    // Handle error (optional, you can display the error message)
+                        document.querySelector('.response div').remove();
+                        document.querySelector('.response').innerHTML += `
+                        <div style="display:inline; animation: fade 2s forwards">${data.message}</div>`;
+            }
+            }
+        </script>
+    {% endblock body %}

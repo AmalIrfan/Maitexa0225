@@ -1,0 +1,67 @@
+{% extends "_base.html" %}
+    {% block head %}
+        <title>Students Records</title>
+    {% endblock head %}
+    {% block body %}
+        <div class="logo1">Students Record.</div>
+        {% if user.is_authenticated %}
+            Welcome {{ user.username }}
+            <a href="/logout" class="btn login1">Logout</a>
+            <a href="/delete_account" class="btn signup1">Delete Account</a>
+
+            <ul>
+            {% for d in data %}
+                <li>{{d.datafile.name}}
+                    <form style="display:inline" hx-post="/?delete" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner">
+                        {% csrf_token %}
+                        <input name="id" value="{{d.id}}" type="hidden"/>
+                        <input value="X" type="submit"/>
+                    </form>
+                </li>
+            {% endfor %}
+            </ul>
+
+            <form hx-post="/" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input name="file" placeholder="file" type="file" required/>
+                <input value="upload" type="submit"/>
+            </form>
+            AI suggestions: <form style="display:inline" hx-post="/?regen" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner">
+                {% csrf_token %}
+                <input value="Regenerate" type="submit"/>
+            </form>
+            <ul>
+            {% for d in request.session.suggestions %}
+                <li>{{d}}</li>
+            {% endfor %}
+            </ul>
+            <script>
+                function handleResponse(event) {
+                    // Get the response data from the server
+                    const response = event.detail.xhr.responseText;
+                    const data = JSON.parse(response);
+    
+                    // Check if the response indicates success
+                    if (data.status === 'success') {
+                        // Redirect the user to the new URL provided by the server
+                        window.location.href = data.redirect_url;
+                    } else {
+                        // Handle error (optional, you can display the error message)
+                        document.querySelector('.response div').remove();
+                        document.querySelector('.response').innerHTML += `
+                        <div style="display:inline; animation: fade 2s forwards">${data.message}</div>`;
+                    }
+                }
+            </script>
+        {% else %}
+            <div class="cap1">Please Login or Signup.</div>
+            <a href="/login" class="btn login1">Login</a>
+            <a href="/signup" class="btn signup1">Signup</a>
+        {% endif %}
+        <div class="response" style="display:flex; align-items: center">
+            <svg style="display:inline" width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" id="spinner"class="htmx-indicator">
+                <path d="M 10 50 A 40 40 0 1 1 50 90" stroke="black" fill="transparent" stroke-width="2" />
+            </svg>
+            <div style="display:inline; animation: fade 2s forwards">{{message}}</div>
+        </div>
+    {% endblock body %}
