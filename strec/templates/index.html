@@ -1,13 +1,35 @@
 {% extends "_base.html" %}
     {% block head %}
-        <title>Students Records</title>
+        <title>Career Suggestion</title>
     {% endblock head %}
     {% block body %}
-        <div class="logo1">Students Record.</div>
+        <div class="logo1">Career Suggestions.</div>
         {% if user.is_authenticated %}
-            Welcome {{ user.username }}
-            <a href="/logout" class="btn login1">Logout</a>
-            <a href="/delete_account" class="btn signup1">Delete Account</a>
+            <div class="header">
+                <div>Welcome {{ user.username }}</div>
+                <div>
+                    <a href="/logout" class="btn login1">Logout</a>
+                    <a href="/delete_account" class="btn signup1">Delete Account</a>
+                </div>
+            </div>
+
+            <br/>
+
+            Upload a CSV file in the Given format:
+
+{% if effective %}
+Effective data:
+<pre>{{effective}}</pre>
+{% else %}
+Example:
+<pre>
+    Year, Name of Course, Aggregate,
+    2028, C Low level computer programming diploma, 60,
+    2027, B. Computer Application, 80,
+    2024, Grade 12 PCM CS, 85,
+    2022, Grade 10, 84,
+</pre>
+{% endif %}
 
             <ul>
             {% for d in data %}
@@ -21,12 +43,17 @@
             {% endfor %}
             </ul>
 
-            <form hx-post="/" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner" enctype="multipart/form-data">
+            <form class="upload" hx-post="/" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input name="file" placeholder="file" type="file" required/>
+                <label class="btn">
+                <input name="file" style="display:none;" placeholder="file" type="file" required/>
+                Choose File
+                </label>
                 <input value="upload" type="submit"/>
             </form>
-            AI suggestions: <form style="display:inline" hx-post="/?regen" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner">
+            <br/>
+            <br/>
+            AI suggestions: <form style="display:inline;float: right;" hx-post="/?regen" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner">
                 {% csrf_token %}
                 <input value="Regenerate" type="submit"/>
             </form>
@@ -54,7 +81,7 @@
                 }
             </script>
         {% else %}
-            <div class="cap1">Please Login or Signup.</div>
+            <p class="cap1">Please Login or Signup.</p>
             <a href="/login" class="btn login1">Login</a>
             <a href="/signup" class="btn signup1">Signup</a>
         {% endif %}

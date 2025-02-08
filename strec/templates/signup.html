@@ -4,7 +4,7 @@
     {% endblock head %}
     {% block body %}
         <div class="logo1">Student Login.</div>
-        <form hx-post="/signup/" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner">
+        <form hx-post="/signup/" hx-on::after-request="handleResponse(event)" hx-swap="none" hx-indicator="#spinner" class="user-form">
             {% csrf_token %}
             <input name="username" placeholder="username" required/>
             <input name="password" placeholder="password" type="password" required/>

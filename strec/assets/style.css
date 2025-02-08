@@ -20,3 +20,54 @@
         opacity: 0;
     }
 }
+
+a.btn, button, .btn, input[type="submit"], input[type="button"]{
+    color: inherit;
+    text-decoration: none;
+    background-color: #eee;
+    border: 1px solid #333;
+    padding: 5px;
+    font-size: 1rem;
+}
+
+.logo1 {
+    text-align: center;
+    display: block;
+    font-size: 2em;
+    padding-bottom: 1em;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.header:first-child {
+    flex: 1;
+}
+
+.upload {
+    display: flex;
+    justify-content: space-around;   
+}
+
+.user-form {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.user-form > * {
+    width: 100%;
+}
+
+body {
+    max-width: 900px;
+    margin: auto;
+    padding: 1em;
+}

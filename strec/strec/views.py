@@ -10,8 +10,7 @@ from .models import UserData
 
 import json
 
-import os
-API_KEY=os.environ["API_KEY"]
+from .settings import API_KEY
 
 def getinfo(request):
     
@@ -42,8 +41,6 @@ What is the person with this qualification maybe best suitable for?
             req = ureq.Request(url, data=q.encode("utf-8"))
             req.add_header('Content-Type', 'application/json')
             resp = ureq.urlopen(req).read()
-            resp = '{\n  "candidates": [\n    {\n      "content": {\n        "parts": [\n          {\n            "text": "Chemical Laboratory Technician,  Chemistry Technician,  Lab Assistant\\n"\n          }\n        ],\n        "role": "model"\n      },\n      "finishReason": "STOP",\n      "avgLogprobs": -0.52077798048655188\n    }\n  ],\n  "usageMetadata": {\n    "promptTokenCount": 113,\n    "candidatesTokenCount": 12,\n    "totalTokenCount": 125,\n    "promptTokensDetails": [\n      {\n        "modality": "TEXT",\n        "tokenCount": 113\n      }\n    ],\n    "candidatesTokensDetails": [\n      {\n        "modality": "TEXT",\n        "tokenCount": 12\n      }\n    ]\n  },\n  "modelVersion": "gemini-1.5-flash"\n}\n'
-            print(resp)
             datas = json.loads(resp)["candidates"][0]["content"]["parts"][0]["text"].strip().split(",")
             request.session["suggestions"] = datas
             request.session["message"] = "Regenerated."
@@ -60,14 +57,18 @@ What is the person with this qualification maybe best suitable for?
         else:
             return JsonResponse({'status': 'failed', 'message':'Invalid input.'})
     data=None
+    effective = None
     if request.user.is_authenticated:
         data = UserData.objects.filter(user=request.user)
+        for d in data:
+            csv = d.datafile.open("r")
+            effective = csv.read()
 
     message = ""
     if "message" in request.session:
         message = request.session["message"]
         del request.session["message"]
-    return render(request, "index.html", {"data":data,"message":message, })
+    return render(request, "index.html", {"data":data,"effective":effective,"message":message, })
 
 def login_view(request):
     if request.method == "POST":
@@ -88,6 +89,8 @@ def logout_view(request):
     if request.user.is_authenticated:
         logout(request)
         request.session["message"] = 'Successfully logged out.'
+        if "suggestions" in request.session:
+            del request.session["suggestions"]
     return redirect('/')
 
 def signup_view(request):
@@ -112,4 +115,6 @@ def delete_account(request):
         logout(request)
         User.objects.get(username=username).delete()
         request.session["message"] = 'Account deleted.'
+        if "suggestions" in request.session:
+            del request.session["suggestions"]
     return redirect("/")
